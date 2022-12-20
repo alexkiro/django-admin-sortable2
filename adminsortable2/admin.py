@@ -19,6 +19,7 @@ from django.forms import widgets
 from django.forms.fields import IntegerField
 from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseForbidden
+from django.template.loader import select_template
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
@@ -403,10 +404,19 @@ class SortableAdminMixin(SortableAdminBase):
             startorder = getattr(obj, self.default_order_field)
             self._move_item(startorder, endorder, extra_model_filters)
 
+    @property
+    def __base_change_list_template(self):
+        template = super().change_list_template
+
+        if isinstance(template, (list, tuple)):
+            return select_template(template)
+        else:
+            return template or 'admin/change_list.html'
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['sortable_update_url'] = self.get_update_url(request)
-        extra_context['base_change_list_template'] = super().change_list_template or 'admin/change_list.html'
+        extra_context['base_change_list_template'] = self.__base_change_list_template
         return super().changelist_view(request, extra_context)
 
     def get_update_url(self, request):

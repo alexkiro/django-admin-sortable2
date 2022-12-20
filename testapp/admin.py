@@ -93,6 +93,27 @@ class SortableAdminExtraMixin(SortableAdminMixin, ImportExportMixin, admin.Model
     inlines = [ChapterStackedInline]
 
 
+class PolymorphicMixin:
+    """
+    Dummy mixin class to test if a proprietary change_list_template is properly overwritten
+    when the value is a list.
+    """
+
+    @property
+    def change_list_template(self):
+        return ['testapp/impexp_change_list.html']
+
+
+class PolymorphicAdminExtraMixin(SortableAdminMixin, PolymorphicMixin, admin.ModelAdmin):
+    """
+    Test if SortableAdminMixin works if admin class inherits from extra mixins overriding
+    the change_list_template template.
+    """
+    list_per_page = 12
+    ordering = ['my_order']
+    inlines = [ChapterStackedInline]
+
+
 class BookAdminSite(admin.AdminSite):
     enable_nav_sidebar = False
 
@@ -140,3 +161,4 @@ admin.site.register(Book, DownOrderedSortableBookAdmin, name="Books (reverse ord
 admin.site.register(Book, SortableBookAdminTabular, name="Books (ordered by admin, tabular inlines)", infix=5)
 admin.site.register(Book, UnsortedBookAdmin, name="Unsorted Books (sorted stacked inlines)", infix=6)
 admin.site.register(Book, SortableAdminExtraMixin, name="Books (inheriting from external admin mixin)", infix=7)
+admin.site.register(Book, PolymorphicAdminExtraMixin, name="Books (inheriting from external admin mixin)", infix=8)
